@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +76,7 @@ private final static String TAG = "BLE";
             init();
             scanLeDevice(true);
         }
+
     }
 
     @Override
@@ -163,7 +165,14 @@ private final static String TAG = "BLE";
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicRead(gatt, characteristic, status);
                 Log.v(TAG, "onCharacteristicRead" + characteristic.getUuid() + " Value : " + characteristic.getValue());
+                final byte[] data = characteristic.getValue();
+                if (data != null && data.length > 0) {
+                    final StringBuilder stringBuilder = new StringBuilder(data.length);
+                    for(byte byteChar : data)
+                        stringBuilder.append(String.format("%02X ", byteChar));
 
+                    Log.v(TAG, "onCharacteristicRead" +stringBuilder.toString() + "Data : " + data );
+                }
             }
 
             @Override
@@ -172,15 +181,19 @@ private final static String TAG = "BLE";
 
                 Log.v(TAG, "onCharacteristicWrite : " + characteristic.getUuid() + " Status : " + status);
 
+                boolean statusCharAuthRead = mBluetoothGatt.readCharacteristic(mCharAuthentication);
+                Log.v(TAG, "statusCharAuthRead Status : " + statusCharAuthRead);
+
                     boolean statusNotifiaction = mBluetoothGatt.setCharacteristicNotification(mCharAuthentication, true);
                     Log.v(TAG, "CharAuthentication Notification : " + statusNotifiaction);
 
-                    boolean statusCharAuthRead = mBluetoothGatt.readCharacteristic(mCharAuthentication);
-                    Log.v(TAG, "statusCharAuthRead Status : " + statusCharAuthRead);
-
                     if (mBluetoothDevice.getBondState() != BluetoothDevice.BOND_BONDED) {
+//                        mBluetoothDevice.setPin(new byte[]{ 0x60, 0x00, 0x60, 0x00});
                         boolean statusCreateBound = mBluetoothDevice.createBond();
                         Log.v(TAG, "Create Bound Status: " + statusCreateBound);
+                    } else {
+                        mBluetoothGatt.discoverServices();
+                        Log.v(TAG, "discover service again ");
                     }
 
             }
@@ -189,7 +202,9 @@ private final static String TAG = "BLE";
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
                 Log.v(TAG, "onCharacteristicChanged value : " + characteristic.getValue() );
-
+                byte[] charValue = characteristic.getValue();
+                byte flag = charValue[0];
+                Log.i(TAG, "Characteristic: " + flag);
             }
 
             @Override
@@ -307,15 +322,35 @@ private final static String TAG = "BLE";
 
                 if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
                     Log.v(TAG, "Device is Paired");
-
-                    mCharCommandTx.setValue(new byte[]{ 0x60, 0x00});
-                    mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                    boolean statusCertificate = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                    BluetoothGattCharacteristic requestCert = mCharCommandTx;// new BluetoothGattCharacteristic(UUID.fromString("4D050017-766C-42C4-8944-42BC98FC2D09"), 0 , 0);
+                    requestCert.setValue(new byte[]{ 0x60, 0x00});
+                    requestCert.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                    boolean statusCertificate = mBluetoothGatt.writeCharacteristic(requestCert);
                     Log.v(TAG, "Write commandCertificate into  4D050017 : " + statusCertificate);
 
                     boolean statusReadCharAuth = mBluetoothGatt.
                             readCharacteristic(mCharAuthentication);
                     Log.v(TAG, "Read Authentication characteristics status : " + statusReadCharAuth);
+
+//                    byte[] commandChallenge = {(byte)61,(byte)00};
+//                    mCharCommandTx.setValue(new byte[]{ 0x61, 0x00});
+//                    mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+//                    boolean statusChallenge = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+//                    Log.v(TAG, "Write commandChallenge into  4D050017 : " + statusChallenge);
+//
+//
+//                    byte[] commandSignatureSend = {0x63,0x20 ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10,0x11,0x21,0x31,0x41,0x51,0x61,0x71,(byte) 0x81,(byte)0x91,(byte)0xA1,(byte)0xB1,(byte)0xC1,(byte)0xD1,(byte)0xE1,(byte)0xF2,0x0};
+//                    mCharCommandTx.setValue(commandSignatureSend);
+//                    mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+//                    boolean statusSignatureSend = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+//                    Log.v(TAG, "Write commandSignature into  4D050017 : " + statusSignatureSend);
+//
+//
+//                    byte[] commandChallengeSend = {0x62,0x20 ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10,0x11,0x21,0x31,0x41,0x51,0x61,0x71,(byte) 0x81,(byte)0x91,(byte)0xA1,(byte)0xB1,(byte)0xC1,(byte)0xD1,(byte)0xE1,(byte)0xF2,0x0};
+//                    mCharCommandTx.setValue(commandChallengeSend);
+//                    mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+//                    boolean statusChallengeSend = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+//                    Log.v(TAG, "Write 6000 into  4D050017 : " + statusChallengeSend);
 
 
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
@@ -333,5 +368,20 @@ private final static String TAG = "BLE";
             bArr[i / 2] = (byte) ((Character.digit(str.charAt(i), 16) << 4) + Character.digit(str.charAt(i + 1), 16));
         }
         return bArr;
+    }
+
+    public static String encode(byte[] bytes) {
+        final int length = bytes.length;
+
+        // | BigInteger constructor throws if it is given an empty array.
+        if (length == 0) {
+            return "00";
+        }
+
+        final int evenLength = (int)(2 * Math.ceil(length / 2.0));
+        final String format = "%0" + evenLength + "x";
+        final String result = String.format (format, new BigInteger(bytes));
+
+        return result;
     }
 }

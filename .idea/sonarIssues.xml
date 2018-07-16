@@ -3,7 +3,22 @@
   <component name="issues">
     <option name="index">
       <map>
+        <entry key="/Dummy.txt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="F:/Example/BleLibrary-master/app/src/main/java/com/spectrum/ble/BluetoothLeService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="F:/Example/BleLibrary-master/app/src/main/java/com/spectrum/ble/blelibrary/DeviceAdapter.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="F:/Example/BleLibrary-master/app/src/main/java/com/spectrum/ble/blelibrary/DeviceControlActivity.java">
           <value>
             <set />
           </value>
