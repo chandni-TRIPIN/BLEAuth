@@ -33,6 +33,41 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/ReleaseNotes.txt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/java/com/spectrum/kit/homemgmt/AddNewHomeFragment.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/java/com/spectrum/kit/homemgmt/HomesLockSettingFragment.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/java/com/spectrum/kit/homemgmt/sidemenu/NavigationMenuHelper.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/java/com/spectrum/kit/networking/retrofit/APIInterface.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/java/com/spectrum/kit/onboarding/login/activity/LoginActivity.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../../SourceCode/Ravi_Spectrum_Android/commonclasses/src/main/res/values/strings.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
       </map>
     </option>
   </component>
