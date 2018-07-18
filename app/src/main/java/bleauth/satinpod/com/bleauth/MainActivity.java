@@ -165,6 +165,14 @@ private final static String TAG = "BLE";
                 {
                     Log.e("WRITE SUCCESS", "onCharacteristicWrite() - status: " + status + "  - UUID: " + characteristic.getUuid());
 
+                if(characteristic.getUuid().toString().equalsIgnoreCase("4D050081-766C-42C4-8944-42BC98FC2D09")) {
+                    BluetoothGattDescriptor descriptor = mCharAuthentication.getDescriptor(
+                            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                    mBluetoothGatt.writeDescriptor(descriptor);
+                    Log.e(TAG, "Indication Enable for : " + characteristic.getUuid());
+                }
+
                 } else {
 
                 }
@@ -180,9 +188,7 @@ private final static String TAG = "BLE";
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
                 Log.v(TAG, "onCharacteristicChanged value : " + characteristic.getValue() );
-                byte[] charValue = characteristic.getValue();
-                byte flag = charValue[0];
-                Log.i(TAG, "Characteristic: " + flag);
+                broadcastUpdate(characteristic);
             }
 
             @Override
@@ -280,7 +286,6 @@ private final static String TAG = "BLE";
         boolean status = mBluetoothGatt.writeCharacteristic(mCharIdentify);
         Log.v(TAG, "Lock Identify : " + status);
 
-        mBluetoothGatt.readCharacteristic(mCharAuthentication);
         mBluetoothGatt.setCharacteristicNotification(mCharAuthentication, true);
     }
 
@@ -300,24 +305,12 @@ private final static String TAG = "BLE";
 
                     Log.v(TAG, "Write 60 commandCertificate into  4D050017 : " + status60);
 
-                    BluetoothGattDescriptor descriptor = mCharCommandTx.getDescriptor(
-                            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    mBluetoothGatt.writeDescriptor(descriptor);
-
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-//                            mCharCommandTx.setValue(new byte[]{(byte) 0x61, (byte)0x00});
-//                            mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-//                            boolean status61 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
-//                            Log.v(TAG, "Write 61 commandCertificate into  4D050017 : " + status61);
+
                         }
                     }, SCAN_PERIOD);
-
-                    broadcastUpdate(mCharAuthentication);
-                    mBluetoothGatt.readCharacteristic(mCharAuthentication);
-                    broadcastUpdate(mCharAuthentication);
 
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
                     Log.v(TAG, "Device is Un Paired");
