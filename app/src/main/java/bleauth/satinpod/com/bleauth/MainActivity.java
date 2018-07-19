@@ -18,6 +18,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.List;
@@ -30,7 +33,7 @@ private final static String TAG = "BLE";
     private Handler mHandler;
 
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 50000;
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
 
     private BluetoothGatt mBluetoothGatt;
@@ -45,10 +48,18 @@ private final static String TAG = "BLE";
     private BluetoothGattCharacteristic mCharAuthentication;
     private BluetoothGattCharacteristic mCharCommandTx;
 
+    Button mSendCommand;
+    Button mSendCommandUnLock;
+
+    EditText mCommand;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mCommand = findViewById(R.id.command);
+        mSendCommand = findViewById(R.id.send_command);
+        mSendCommandUnLock = findViewById(R.id.send_command_unlock);
 
         // Use this check to determine whether BLE is supported on the device. Then
 // you can selectively disable BLE-related features.
@@ -60,6 +71,28 @@ private final static String TAG = "BLE";
             init();
             scanLeDevice(true);
         }
+
+        mSendCommand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCharCommandTx.setValue(new byte[]{(byte) 0x03, (byte)0x01,  (byte)0x03});
+                mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                boolean statusLock = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                Log.v(TAG, "Write Lock command  into  4D050017 : " + statusLock);
+            }
+        });
+
+        mSendCommandUnLock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String command = mCommand.getText().toString();
+                byte[] commandInByte = createByteArray(command);
+                mCharCommandTx.setValue(new byte[]{(byte) 0x03, (byte)0x01,  (byte)0x03});
+                mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                boolean statusUnLock = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                Log.v(TAG, "Write unlock Command  into  4D050017 : " + statusUnLock);
+            }
+        });
 
     }
 
@@ -302,15 +335,52 @@ private final static String TAG = "BLE";
                     mCharCommandTx.setValue(new byte[]{(byte) 0x60, (byte)0x00});
                     mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
                     boolean status60 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
-
-                    Log.v(TAG, "Write 60 commandCertificate into  4D050017 : " + status60);
+                    Log.v(TAG, "Write 6000 commandCertificate into  4D050017 : " + status60);
 
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-
+                            mCharCommandTx.setValue(new byte[]{(byte) 0x61, (byte)0x00});
+                            mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                            boolean status61 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                            Log.v(TAG, "Write 0x61 commandCertificate into  4D050017 : " + status61);
                         }
-                    }, SCAN_PERIOD);
+                    }, 5000);
+
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] commandSignatureSend = {0x63, 0x20, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x21, 0x31, 0x41, 0x51, 0x61, 0x71, (byte) 0x81, (byte) 0x91, (byte) 0xA1, (byte) 0xB1, (byte) 0xC1, (byte) 0xD1, (byte) 0xE1, (byte) 0xF2, 0x0};
+                            mCharCommandTx.setValue(commandSignatureSend);
+                            mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                            boolean status63 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                            Log.v(TAG, "Write 0x63 commandSignature into  4D050017 : " + status63);
+                        }
+                    }, 10000);
+
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] commandSignatureSend = {0x62, 0x20, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x21, 0x31, 0x41, 0x51, 0x61, 0x71, (byte) 0x81, (byte) 0x91, (byte) 0xA1, (byte) 0xB1, (byte) 0xC1, (byte) 0xD1, (byte) 0xE1, (byte) 0xF2, 0x0};
+                            mCharCommandTx.setValue(commandSignatureSend);
+                            mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                            boolean status62 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                            Log.v(TAG, "Write 0x62 commandSignature into  4D050017 : " + status62);
+                        }
+                    }, 17000);
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCharCommandTx.setValue(new byte[]{(byte) 0x66, (byte)0x00});
+                            mCharCommandTx.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                            boolean status61 = mBluetoothGatt.writeCharacteristic(mCharCommandTx);
+                            Log.v(TAG, "Write 0x66 commandCertificate into  4D050017 : " + status61);
+                        }
+                    }, 23000);
+
 
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED){
                     Log.v(TAG, "Device is Un Paired");
@@ -331,5 +401,14 @@ private final static String TAG = "BLE";
                 stringBuilder.append(String.format("%02X ", byteChar));
             Log.v(TAG, "Data in String : " + stringBuilder.toString());
         }
+    }
+
+    public static byte[] createByteArray(String str) {
+        int length = str.length();
+        byte[] bArr = new byte[(length / 2)];
+        for (int i = 0; i < length; i += 2) {
+            bArr[i / 2] = (byte) ((Character.digit(str.charAt(i), 16) << 4) + Character.digit(str.charAt(i + 1), 16));
+        }
+        return bArr;
     }
 }
